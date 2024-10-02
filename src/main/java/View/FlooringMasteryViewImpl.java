@@ -1,6 +1,7 @@
 package View;
 
 import org.json.JSONObject;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -8,18 +9,18 @@ import java.time.format.DateTimeParseException;
 import java.util.InputMismatchException;
 import java.util.List;
 
-import Model.DAO.OrdersDAO;
+import Model.DAO.OrdersDAOImpl;
 import Model.DAO.ProductsDAO;
 import Model.DAO.TaxesDAO;
 import Model.Order;
-import View.UserIO.UserIO;
+import View.UserIO.UserIOImpl;
 
 /**
  * The {@code FlooringMasteryView} class provides a user interface for the Flooring Mastery application,
  * allowing users to interact with the system through various options such as displaying orders,
  * adding, editing, and removing orders, as well as exporting data.
  *
- * This class utilizes the {@link UserIO} class for handling user input and output, ensuring a
+ * This class utilizes the {@link UserIOImpl} class for handling user input and output, ensuring a
  * consistent user experience. It also includes methods for validating user inputs related to orders
  * and other relevant data, managing both order details and customer information.
  *
@@ -29,13 +30,14 @@ import View.UserIO.UserIO;
  *   Displaying and confirming order details.
  *   Handling input for existing and future dates, order numbers, customer names, states, product types, and areas.
  *
- * This class implements the {@link IView} interface, ensuring that it adheres to the defined
+ * This class implements the {@link View} interface, ensuring that it adheres to the defined
  * contract for view components within the Flooring Mastery application.
  */
-public class FlooringMasteryView implements IView{
-  public UserIO userIO;
-  public FlooringMasteryView(UserIO userIO) {
-    this.userIO = userIO;
+@Component
+public class FlooringMasteryViewImpl implements View {
+  public UserIOImpl userIOImpl;
+  public FlooringMasteryViewImpl(UserIOImpl userIOImpl) {
+    this.userIOImpl = userIOImpl;
   }
 
   /**
@@ -45,7 +47,7 @@ public class FlooringMasteryView implements IView{
    */
   @Override
   public int displayMenu() {
-    int choice = userIO.readInt(
+    int choice = userIOImpl.readInt(
             "\n* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n" +
             "* <<Flooring Program>>\n" +
             "* 1. Display Orders\n" +
@@ -65,12 +67,12 @@ public class FlooringMasteryView implements IView{
    */
   @Override
   public JSONObject displayOrderForDate() {
-    userIO.print("\nPlease Enter a Date of the Order to be Viewed");
-    userIO.print("----------------------------------------------+");
-    userIO.readString("");
+    userIOImpl.print("\nPlease Enter a Date of the Order to be Viewed");
+    userIOImpl.print("----------------------------------------------+");
+    userIOImpl.readString("");
 
     JSONObject orderInfo = new JSONObject();
-    orderInfo.put("date", getExistingDate("Please Enter An Existing Order Date [MM/DD/YYYY]:"));
+    orderInfo.put("date", getExistingDate());
     return orderInfo;
   }
 
@@ -82,12 +84,12 @@ public class FlooringMasteryView implements IView{
    */
   @Override
   public JSONObject addOrder(){
-    userIO.print("\nPlease Enter the Required Fields to Create New Order");
-    userIO.print("-----------------------------------------------------+");
-    userIO.readString("");
+    userIOImpl.print("\nPlease Enter the Required Fields to Create New Order");
+    userIOImpl.print("-----------------------------------------------------+");
+    userIOImpl.readString("");
 
     JSONObject orderInfo = new JSONObject();
-    orderInfo.put("date", getFutureDate("Enter Date [MM/DD/YYYY]: "));
+    orderInfo.put("date", getFutureDate());
     orderInfo.put("name", getValidName("\nEnter Customer's Name: ", false));
     orderInfo.put("state", getValidState("\nEnter State (abbreviation): ", false));
     orderInfo.put("product type", getValidProductType("\nEnter Product Type: ", false));
@@ -109,12 +111,12 @@ public class FlooringMasteryView implements IView{
     introEditOrder(orderInfo);
 
     while(true) {
-      orderInfo.put("name", getValidName("Enter New Customer's Name: ", true));
-      orderInfo.put("state", getValidState("Enter New State (abbreviation): ", true));
-      orderInfo.put("product type", getValidProductType("Enter New Product Type: ", true));
-      orderInfo.put("area", getValidArea("Enter New Est. Area: ", true));
+      orderInfo.put("name", getValidName("\nEnter New Customer's Name: ", true));
+      orderInfo.put("state", getValidState("\nEnter New State (abbreviation): ", true));
+      orderInfo.put("product type", getValidProductType("\nEnter New Product Type: ", true));
+      orderInfo.put("area", getValidArea("\nEnter New Est. Area: ", true));
 
-      userIO.print("\n----------------+\n" +
+      userIOImpl.print("\n----------------+\n" +
               "Changes: \n" +
               "----------------+\n" +
               "New Name: " + orderInfo.getString("name") + "\n" +
@@ -122,16 +124,25 @@ public class FlooringMasteryView implements IView{
               "New Product Type: " + orderInfo.getString("product type") + "\n" +
               "New Area: " + orderInfo.getString("area") +
               "\n-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --\n" +
-              "If the field is empty it means that field will remain as is.\n");
+              " * If the field is empty it means that field will remain as is.\n");
 
-      String shouldUpdate = userIO.readString("Do you want to save these changes? (y/n): ");
+      String shouldUpdate = userIOImpl.readString("Do you want to save these changes? (y/n): ");
       if (shouldUpdate.equalsIgnoreCase("y")) {
        break;
-      } else { userIO.print("   * No changes were made *"); }
+      } else {
+        userIOImpl.print("   * No changes were made *");
+        orderInfo.remove("date");
+        orderInfo.remove("order number");
+        orderInfo.remove("name");
+        orderInfo.remove("state");
+        orderInfo.remove("product type");
+        orderInfo.remove("area");
+        return orderInfo;
+      }
     }
 
-    userIO.print("\nHere is the updated order:");
-    userIO.print("------------------------------");
+    userIOImpl.print("\nHere is the updated order:");
+    userIOImpl.print("------------------------------");
     return orderInfo;
   }
 
@@ -142,17 +153,17 @@ public class FlooringMasteryView implements IView{
    * @param orderInfo the JSON object that contains the order information
    */
   private void introEditOrder(JSONObject orderInfo) {
-    userIO.print("\nPlease Enter the New Information When Prompted OR Press Enter to Skip");
-    userIO.print("---------------------------------------------------------------");
-    userIO.readString("");
+    userIOImpl.print("\nPlease Enter the New Information When Prompted OR Press Enter to Skip");
+    userIOImpl.print("---------------------------------------------------------------");
+    userIOImpl.readString("");
 
-    String date = getExistingDate("Please Enter An Existing Order Date [MM/DD/YYYY]:");
+    String date = getExistingDate();
     orderInfo.put("date", date);
-    orderInfo.put("order number", getExistingOrderNumber("\nPlease Enter Order Number: ", date));
+    orderInfo.put("order number", getExistingOrderNumber(date));
 
-    userIO.print("----------------------------------");
-    userIO.print("Now Please Enter New Information: ");
-    userIO.print("----------------------------------");
+    userIOImpl.print("----------------------------------");
+    userIOImpl.print("Now Please Enter New Information: ");
+    userIOImpl.print("----------------------------------");
   }
 
   /**
@@ -163,14 +174,14 @@ public class FlooringMasteryView implements IView{
    */
   @Override
   public JSONObject removeOrder() {
-    userIO.print("\nPlease Enter the Date and Order Number to Remove Order");
-    userIO.print("-------------------------------------------------------+");
-    userIO.readString("");
+    userIOImpl.print("\nPlease Enter the Date and Order Number to Remove Order");
+    userIOImpl.print("-------------------------------------------------------+");
+    userIOImpl.readString("");
 
     JSONObject orderInfo = new JSONObject();
-    String date = getExistingDate("Please Enter An Existing Order Date [MM/DD/YYYY]:");
+    String date = getExistingDate();
     orderInfo.put("date", date);
-    orderInfo.put("order number", getExistingOrderNumber("\nPlease Enter Order Number: ", date));
+    orderInfo.put("order number", getExistingOrderNumber(date));
 
     return orderInfo;
   }
@@ -184,16 +195,16 @@ public class FlooringMasteryView implements IView{
    */
   @Override
   public boolean displayOrder(Order order) {
-    userIO.print("This is the order to be removed:");
-    userIO.print(order.toString());
+    userIOImpl.print("This is the order to be removed:");
+    userIOImpl.print(order.toString());
 
-    String shouldUpdate = userIO.readString(" * type 'y' for yes and 'n' for no *");
+    String shouldUpdate = userIOImpl.readString(" * type 'y' for yes and 'n' for no *");
 
     if (shouldUpdate.equals("y")) {
-      userIO.print("\nOrder Removed");
+      userIOImpl.print("\nOrder Removed");
       return true;
     }
-    userIO.print("\nAction Revoked");
+    userIOImpl.print("\nAction Revoked");
     return false;
   }
 
@@ -203,27 +214,26 @@ public class FlooringMasteryView implements IView{
    * If the input is empty or the date does not exist in the database,
    * the user is prompted to try again.
    *
-   * @param prompt the message to display when asking for a date
    * @return a string representing a valid existing order date in MM/DD/YYYY format
    */
-  private String getExistingDate(String prompt) {
+  private String getExistingDate() {
     String stringDate;
     LocalDate date;
     int count = 0;
 
     while (count < 3) {
-      stringDate = userIO.readString(prompt);
+      stringDate = userIOImpl.readString("Please Enter An Existing Order Date [MM/DD/YYYY]:");
 
       if (stringDate.isEmpty()) {
-        userIO.print("    * Input cannot be empty. Please try again. *\n");
+        userIOImpl.print("    * Input cannot be empty. Please try again. *\n");
         continue;
       }
 
       try {
         date = LocalDate.parse(stringDate, DateTimeFormatter.ofPattern("MM/dd/yyyy"));
 
-        if (!OrdersDAO.orderStorage.containsKey(date)) {
-          userIO.print("    * Date does not exist in database. Please try again. *\n");
+        if (!OrdersDAOImpl.orderStorage.containsKey(date)) {
+          userIOImpl.print("    * Date does not exist in database. Please try again. *\n");
           count ++;
           continue;
         }
@@ -231,10 +241,10 @@ public class FlooringMasteryView implements IView{
         return stringDate;
 
       } catch (DateTimeParseException e) {
-        userIO.print("    * Invalid date format. Please enter the date in MM/DD/YYYY format. *\n");
+        userIOImpl.print("    * Invalid date format. Please enter the date in MM/DD/YYYY format. *\n");
       }
     }
-    userIO.print("    * Infinite loop break *\n");
+    userIOImpl.print("    * Infinite loop break *");
     return "";
   }
 
@@ -243,27 +253,26 @@ public class FlooringMasteryView implements IView{
    * If the input is not in the correct format or is not a future date,
    * the user is prompted to try again.
    *
-   * @param prompt the message to display when asking for a date
    * @return a string representing a valid future date in MM/DD/YYYY format
    */
-  private String getFutureDate(String prompt) {
+  private String getFutureDate() {
     LocalDate currDate = LocalDate.now();
     LocalDate date;
     String stringDate;
 
     while(true) {
-      stringDate = userIO.readString(prompt);
+      stringDate = userIOImpl.readString("Enter Date [MM/DD/YYYY]: ");
 
       try {
         date = LocalDate.parse(stringDate, DateTimeFormatter.ofPattern("MM/dd/yyyy"));
 
         if (!date.isAfter(currDate)) {
-          userIO.print("    * The date must be set in the future - please enter a valid date. *\n");
+          userIOImpl.print("    * The date must be set in the future - please enter a valid date. *\n");
           continue;
         }
 
       } catch (DateTimeParseException e) {
-        userIO.print("    * Invalid date format. Please enter the date in MM/DD/YYYY format. *\n");
+        userIOImpl.print("    * Invalid date format. Please enter the date in MM/DD/YYYY format. *\n");
         continue;
       }
 
@@ -276,32 +285,31 @@ public class FlooringMasteryView implements IView{
    * and validates the input. If the order number does not exist for the given date,
    * the user is prompted to try again.
    *
-   * @param prompt the message to display when asking for an order number
    * @param date the date associated with the order to be retrieved
    * @return an integer representing a valid existing order number
    */
-  private int getExistingOrderNumber(String prompt, String date) {
+  private int getExistingOrderNumber(String date) {
     LocalDate existingDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("MM/dd/yyyy"));
     int orderNum;
 
     while(true) {
       try {
-        orderNum = userIO.readInt(prompt);
-        userIO.readString("");
+        orderNum = userIOImpl.readInt("\nPlease Enter Order Number: ");
+        userIOImpl.readString("");
 
       } catch (InputMismatchException e) {
-        userIO.print("  * Invalid input - must be int *\n");
-        userIO.readString("");
+        userIOImpl.print("  * Invalid input - must be int *\n");
+        userIOImpl.readString("");
         continue;
       }
 
-      List<Order> ordersForDate = OrdersDAO.orderStorage.get(existingDate);
+      List<Order> ordersForDate = OrdersDAOImpl.orderStorage.get(existingDate);
       for (int i = 0; i < ordersForDate.size(); i++) {
         if (ordersForDate.get(i).getOrderNumber() == orderNum) {
           return orderNum;
         }
       }
-      userIO.print("    * That order number does not exist in the database. *\n");
+      userIOImpl.print("    * That order number does not exist in the database. *\n");
     }
   }
 
@@ -310,7 +318,6 @@ public class FlooringMasteryView implements IView{
    * If the input is empty and can be empty, it returns a space.
    * Otherwise, it checks that the name contains only letters and numbers.
    *
-   * @param prompt the message to display when asking for a name
    * @param canBeEmpty boolean indicating if the name can be empty
    * @return a string representing a valid customer name
    */
@@ -318,15 +325,19 @@ public class FlooringMasteryView implements IView{
     String name;
 
     while(true) {
-      name = userIO.readString(prompt);
+      name = userIOImpl.readString(prompt);
 
       if (canBeEmpty && name.isEmpty()) {
         return " ";
       } else if (name.matches("[a-zA-Z0-9 ]+")) {
+        if (name.trim().isEmpty()) {
+          userIOImpl.print("    * The customer's name may not be empty - please try again. *\n");
+          continue;
+        }
         return name;
       }
 
-      userIO.print("    * The customer's name must contains only letters or numbers " +
+      userIOImpl.print("    * The customer's name must contains only letters or numbers " +
               "- please enter a valid name. *\n");
     }
   }
@@ -337,7 +348,6 @@ public class FlooringMasteryView implements IView{
    * It checks if the state exists in the tax library and prompts the user
    * to try again if it does not.
    *
-   * @param prompt the message to display when asking for a state abbreviation
    * @param canBeEmpty boolean indicating if the state can be empty
    * @return a string representing a valid state abbreviation
    */
@@ -345,7 +355,7 @@ public class FlooringMasteryView implements IView{
     String state;
 
     while(true) {
-      state = userIO.readString(prompt).toUpperCase();
+      state = userIOImpl.readString(prompt).toUpperCase();
 
       if (canBeEmpty && state.isEmpty()) {
         return " ";
@@ -353,7 +363,7 @@ public class FlooringMasteryView implements IView{
         return state;
       }
 
-      userIO.print("    * Sorry we do NOT conduct business in the given state " +
+      userIOImpl.print("    * Sorry we do NOT conduct business in the given state " +
               "- please enter a valid state. *\n");
     }
   }
@@ -364,7 +374,6 @@ public class FlooringMasteryView implements IView{
    * It checks if the product type exists in the product library and prompts
    * the user to try again if it does not.
    *
-   * @param prompt the message to display when asking for a product type
    * @param canBeEmpty boolean indicating if the product type can be empty
    * @return a string representing a valid product type
    */
@@ -372,7 +381,7 @@ public class FlooringMasteryView implements IView{
     String productType;
 
     while(true) {
-      productType = userIO.readString(prompt);
+      productType = userIOImpl.readString(prompt);
 
       if (!productType.isEmpty()) {
         productType = productType.substring(0, 1).toUpperCase() + productType.substring(1).toLowerCase();
@@ -384,7 +393,7 @@ public class FlooringMasteryView implements IView{
         return productType;
       }
 
-      userIO.print("    * Sorry we do NOT have that type of product" +
+      userIOImpl.print("    * Sorry we do NOT have that type of product" +
                     "- please enter a valid product type. *\n");
     }
   }
@@ -395,7 +404,6 @@ public class FlooringMasteryView implements IView{
    * It ensures the area is a positive integer, prompting the user to try again
    * if it is not.
    *
-   * @param prompt the message to display when asking for an estimated area
    * @param canBeEmpty boolean indicating if the area can be empty
    * @return a string representing a valid estimated area as a positive integer
    */
@@ -403,15 +411,17 @@ public class FlooringMasteryView implements IView{
     String area;
 
     while(true) {
-      area = userIO.readString(prompt);
+      area = userIOImpl.readString(prompt);
 
       if (canBeEmpty && area.isEmpty()) {
         return " ";
       } else if (Integer.valueOf(area) < 1) {
-        userIO.print("    * The area must be positive - please enter a positive number. *\n");
+        userIOImpl.print("    * The area must be positive - please enter a positive number. *\n");
+        continue;
+      } else if (Integer.valueOf(area) < 100 && Integer.valueOf(area) > 1) {
+        userIOImpl.print("    * The minimum area is 100 - please enter a number at or above 100. *\n");
         continue;
       }
-
       return area;
     }
   }

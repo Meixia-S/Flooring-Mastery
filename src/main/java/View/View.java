@@ -10,7 +10,7 @@ import Model.Order;
  * functionality to display menus, collect user input, and return
  * order-related information.
  */
-public interface IView {
+public interface View {
   /**
    * Displays the menu options for the flooring program and prompts the user to make a selection.
    *

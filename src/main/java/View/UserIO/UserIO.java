@@ -2,25 +2,21 @@ package View.UserIO;
 
 import java.math.BigDecimal;
 import java.util.InputMismatchException;
-import java.util.Scanner;
 
 /**
- * The {@code UserIO} class provides methods for user input and output.
- * It implements the {@code IUserIO} interface and utilizes a {@code Scanner}
- * to facilitate reading various types of input from the user.
+ * The {@code IUserIO} interface defines a contract for user input and output operations.
+ * It provides methods for printing messages to the console and reading various types of user inputs,
+ * including strings, integers, and {@code BigDecimal} values. Implementations of this interface
+ * should facilitate user interaction in a consistent manner, ensuring that input is gathered
+ * and output is displayed effectively.
  */
-public class UserIO implements IUserIO {
-  private Scanner userInput = new Scanner(System.in);
-
+public interface UserIO {
   /**
    * Prints a message to the console.
    *
    * @param message the message to be printed
    */
-  @Override
-  public void print(String message) {
-    System.out.println(message);
-  }
+  public void print(String message);
 
   /**
    * Prompts the user for a string input.
@@ -28,11 +24,7 @@ public class UserIO implements IUserIO {
    * @param prompt the prompt message to be displayed to the user
    * @return the string input entered by the user
    */
-  @Override
-  public String readString(String prompt) {
-    System.out.println(prompt);
-    return userInput.nextLine();
-  }
+  public String readString(String prompt);
 
   /**
    * Prompts the user for an integer input.
@@ -41,11 +33,7 @@ public class UserIO implements IUserIO {
    * @return the integer input entered by the user
    * @throws InputMismatchException if the input is not an integer
    */
-  @Override
-  public int readInt(String prompt) {
-    System.out.println(prompt);
-    return userInput.nextInt();
-  }
+  public int readInt(String prompt);
 
   /**
    * Prompts the user for a BigDecimal input.
@@ -53,18 +41,11 @@ public class UserIO implements IUserIO {
    * @param prompt the prompt message to be displayed to the user
    * @return the BigDecimal input entered by the user
    */
-  @Override
-  public BigDecimal readBigDecimal(String prompt) {
-    System.out.println(prompt);
-    return userInput.nextBigDecimal();
-  }
+  public BigDecimal readBigDecimal(String prompt);
 
   /**
    * Clears the scanner buffer to prevent input mismatch errors.
    * This method consumes the newline character remaining in the buffer.
    */
-  @Override
-  public void clearScannerBuffer() {
-    userInput.nextLine();
-  }
+  public void clearScannerBuffer();
 }

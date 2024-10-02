@@ -1,12 +1,15 @@
 package Controller;
 
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 
 import Exceptions.ServiceExceptions;
-import Service.FlooringMasteryService;
-import View.FlooringMasteryView;
+import Service.FlooringMasteryServiceImpl;
+import View.FlooringMasteryViewImpl;
+import software.amazon.ion.SystemSymbols;
 
 /**
  * The {@code FlooringMasteryController} class serves as the controller in the MVC
@@ -14,10 +17,11 @@ import View.FlooringMasteryView;
  * between the view and the service layer, handling user input and updating the
  * view accordingly.
  */
+@Component
 public class FlooringMasteryController {
-  private FlooringMasteryView view;
+  private FlooringMasteryViewImpl view;
 
-  private FlooringMasteryService service;
+  private FlooringMasteryServiceImpl service;
 
   /**
    * Constructs a {@code FlooringMasteryController} with the specified view
@@ -26,7 +30,8 @@ public class FlooringMasteryController {
    * @param view   the view used to display information to the user
    * @param service the service used to handle business logic
    */
-  public FlooringMasteryController(FlooringMasteryView view, FlooringMasteryService service) {
+  @Autowired
+  public FlooringMasteryController(FlooringMasteryViewImpl view, FlooringMasteryServiceImpl service) {
     this.view = view;
     this.service = service;
   }
@@ -43,30 +48,33 @@ public class FlooringMasteryController {
       try {
         choice = view.displayMenu();
       } catch (InputMismatchException e) {
-        view.userIO.print("     *** Please Input an Integer ***");
-        view.userIO.clearScannerBuffer();
+        view.userIOImpl.print("     *** Please Input an Integer ***");
+        view.userIOImpl.clearScannerBuffer();
         continue;
       }
 
       switch(choice) {
         case 1: // Display order for a given date
-          JSONObject dateAndNumber = view.displayOrderForDate();
-          if (dateAndNumber.getString("date").isEmpty()) {
+          JSONObject date = view.displayOrderForDate();
+          if (date.getString("date").isEmpty()) {
             break;
           }
-          String result = service.displayOrders(dateAndNumber);
-          view.userIO.print(result);
+          String result = service.displayOrders(date);
+          view.userIOImpl.print(result);
           break;
         case 2: // Add an order
           try {
-            view.userIO.print(service.addOrder(view.addOrder()).toString());
+            view.userIOImpl.print(service.addOrder(view.addOrder()).toString());
           } catch (ServiceExceptions e) {
             throw new RuntimeException(e);
           }
           break;
         case 3: // Edit an existing order
           try {
-            view.userIO.print(service.editAnOrder(view.editOrder()).toString());
+            JSONObject orderInfo = view.editOrder();
+            if (orderInfo.length() != 0) {
+              view.userIOImpl.print(service.editAnOrder(orderInfo).toString());
+            }
           } catch (ServiceExceptions e) {
             throw new RuntimeException(e);
           }
@@ -78,23 +86,23 @@ public class FlooringMasteryController {
             try {
               service.removeOrder(orderInfo);
             } catch (ServiceExceptions e) {
-              view.userIO.print("Error involving file paths");
+              view.userIOImpl.print("Error involving file paths");
             }
           }
           break;
         case 5: // Export all existing order files to one file titled 'DataExport'
           try {
             service.exportAllData();
-            view.userIO.print(" * Check the 'DataExport.txt' file in the 'Export' folder for the complete order list *");
+            view.userIOImpl.print(" * Check the 'DataExport.txt' file in the 'Backup' folder for the complete order list *");
           } catch (ServiceExceptions e) {
             throw new RuntimeException(e);
           }
           break;
         case 6: // Quit program
-          view.userIO.print("\n *** Thank You for Your Business! ***");
+          view.userIOImpl.print("\n *** Thank You for Your Business! ***");
           return;
         default:
-          view.userIO.print("Invalid Input - If You Want To Quit Press 6");
+          view.userIOImpl.print("Invalid Input - If You Want To Quit Press 6");
           break;
       }
     }

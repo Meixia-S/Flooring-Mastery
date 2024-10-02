@@ -1,11 +1,9 @@
 package App;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import Controller.FlooringMasteryController;
-import Service.FlooringMasteryService;
-import View.FlooringMasteryView;
-import Model.DAO.AuditDAO;
-import Model.DAO.OrdersDAO;
-import View.UserIO.UserIO;
 
 /**
  * The App class serves as the entry point for the Flooring Mastery
@@ -22,12 +20,10 @@ public class App {
   * objects, service layer, and controller, then runs the program.
   */
   public static void main(String[] args) {
-    UserIO userIO = new UserIO();
-    FlooringMasteryView view = new FlooringMasteryView(userIO);
-    AuditDAO auditDAO = new AuditDAO();
-    OrdersDAO ordersDAO = new OrdersDAO();
-    FlooringMasteryService service = new FlooringMasteryService(ordersDAO, auditDAO);
-    FlooringMasteryController controller = new FlooringMasteryController(view, service);
+    ApplicationContext ctx =
+            new ClassPathXmlApplicationContext("applicationContext.xml");
+    FlooringMasteryController controller =
+            ctx.getBean("controller", FlooringMasteryController.class);
     controller.runProgram();
   }
 }

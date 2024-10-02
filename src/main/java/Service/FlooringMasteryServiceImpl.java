@@ -1,6 +1,8 @@
 package Service;
 
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -8,8 +10,8 @@ import java.time.format.DateTimeFormatter;
 
 import Exceptions.ModelExceptions;
 import Exceptions.ServiceExceptions;
-import Model.DAO.AuditDAO;
-import Model.DAO.OrdersDAO;
+import Model.DAO.AuditDAOImpl;
+import Model.DAO.OrdersDAOImpl;
 import Model.Order;
 
 /**
@@ -17,20 +19,22 @@ import Model.Order;
  * flooring orders. It interacts with data access objects to perform operations
  * such as displaying, adding, editing, removing, and retrieving orders.
  */
-public class FlooringMasteryService implements IService {
-  private OrdersDAO ordersDAO;
-  private AuditDAO auditDAO;
+@Component
+public class FlooringMasteryServiceImpl implements Service {
+  private OrdersDAOImpl ordersDAOImpl;
+  private AuditDAOImpl auditDAOImpl;
 
   /**
    * Constructs a new {@code FlooringMasteryService} with the specified
    * {@code OrdersDAO} and {@code AuditDAO}.
    *
-   * @param ordersDAO the data access object for orders
-   * @param auditDAO  the data access object for audit operations
+   * @param ordersDAOImpl the data access object for orders
+   * @param auditDAOImpl  the data access object for audit operations
    */
-  public FlooringMasteryService(OrdersDAO ordersDAO, AuditDAO auditDAO) {
-    this.ordersDAO = ordersDAO;
-    this.auditDAO = auditDAO;
+  @Autowired
+  public FlooringMasteryServiceImpl(OrdersDAOImpl ordersDAOImpl, AuditDAOImpl auditDAOImpl) {
+    this.ordersDAOImpl = ordersDAOImpl;
+    this.auditDAOImpl = auditDAOImpl;
    //LocalDate date = LocalDate.parse("02/25/2025", DateTimeFormatter.ofPattern("MM/dd/yyyy"));
     //his.ordersDAO.addOrder(date, "Jane Doe", "IL", "Bamboo",  BigDecimal.valueOf(100));
   }
@@ -47,7 +51,7 @@ public class FlooringMasteryService implements IService {
     String stringDate = ordersDate.getString("date");
     LocalDate date = LocalDate.parse(stringDate.toString(), DateTimeFormatter.ofPattern("MM/dd/yyyy"));
 
-    return ordersDAO.displayOrders(date);
+    return ordersDAOImpl.displayOrders(date);
   }
 
   /**
@@ -70,8 +74,8 @@ public class FlooringMasteryService implements IService {
     BigDecimal area = BigDecimal.valueOf(Long.parseLong(orderInfo.getString("area")));
 
     try {
-      Order order = ordersDAO.addOrder(date, name, state, productType, area);
-      auditDAO.addOrder(date, order);
+      Order order = ordersDAOImpl.addOrder(date, name, state, productType, area);
+      auditDAOImpl.addOrder(date, order);
       return order;
     } catch (ModelExceptions e) {
       throw new ServiceExceptions(e);
@@ -100,8 +104,8 @@ public class FlooringMasteryService implements IService {
     String edits = name + "," + state + "," + productType + "," + area;
 
     try {
-      Order order = ordersDAO.editAnOrder(date, orderNum, edits);
-      auditDAO.editAnOrder(date, order);
+      Order order = ordersDAOImpl.editAnOrder(date, orderNum, edits);
+      auditDAOImpl.editAnOrder(date, order);
       return order;
     } catch (ModelExceptions e) {
       throw new ServiceExceptions(e);
@@ -122,8 +126,8 @@ public class FlooringMasteryService implements IService {
     int orderNumber = orderInfo.getInt("order number");
 
     try {
-      ordersDAO.removeOrder(date, orderNumber);
-      auditDAO.removeOrder(date, orderNumber);
+      ordersDAOImpl.removeOrder(date, orderNumber);
+      auditDAOImpl.removeOrder(date, orderNumber);
     } catch (ModelExceptions e) {
       throw new ServiceExceptions(e);
     }
@@ -142,7 +146,7 @@ public class FlooringMasteryService implements IService {
     LocalDate date = LocalDate.parse(stringDate, DateTimeFormatter.ofPattern("MM/dd/yyyy"));
     int orderNum = orderInfo.getInt("order number");
 
-    return ordersDAO.getOrder(date, orderNum);
+    return ordersDAOImpl.getOrder(date, orderNum);
   }
 
   /**
@@ -153,7 +157,7 @@ public class FlooringMasteryService implements IService {
   @Override
   public void exportAllData() throws ServiceExceptions {
     try {
-      auditDAO.export();
+      auditDAOImpl.export();
     } catch (ModelExceptions e) {
       throw new ServiceExceptions(e);
     }

@@ -2,7 +2,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import Model.DAO.AuditDAO;
+import Model.DAO.AuditDAOImpl;
 import Model.DAO.ProductsDAO;
 import Model.DAO.TaxesDAO;
 import Model.Product;
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class TaxesAndProductDAOTest {
-  AuditDAO auditDAO = new AuditDAO();
+  AuditDAOImpl auditDAOImpl = new AuditDAOImpl();
 
   @Test
   public void testAddStateAndGetTax() {

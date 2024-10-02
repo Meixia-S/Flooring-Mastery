@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import Exceptions.ServiceExceptions;
 import Model.Order;
 
-public interface IService {
+public interface Service {
   /**
    * Displays all orders for a specified date.
    *

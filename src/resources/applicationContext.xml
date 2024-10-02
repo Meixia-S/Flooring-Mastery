@@ -15,29 +15,27 @@
           http://www.springframework.org/schema/aop
           http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
 
-    <!-- Bean definitions go here
-    <bean id="userIO" class="org.example.UserIOLab"/>
-
-    <bean id="view" class="org.example.ClassRosterView">
+    <!-- View Beans -->
+    <bean id="userIO" class="View.UserIO.UserIOImpl"/>
+    <bean id="view" class="View.FlooringMasteryViewImpl">
         <constructor-arg ref="userIO"/>
     </bean>
 
-    <bean id="classRosterDao"
-          class="org.example.ClassRosterDAO"/>
-
+    <!-- Service Beans -->
+    <bean id="orderDAO"
+          class="Model.DAO.OrdersDAOImpl"/>
     <bean id="auditDao"
-          class="org.example.ClassAuditDao"/>
-
+          class="Model.DAO.AuditDAOImpl"/>
     <bean id="serviceLayer"
-          class="org.example.ClassRosterServiceLayer">
-        <constructor-arg ref="classRosterDao"/>
+          class="Service.FlooringMasteryServiceImpl">
+        <constructor-arg ref="orderDAO"/>
         <constructor-arg ref="auditDao"/>
     </bean>
 
+    <!-- Controller Bean -->
     <bean id="controller"
-          class="org.example.ClassRosterController">
+          class="Controller.FlooringMasteryController">
         <constructor-arg ref="serviceLayer"/>
         <constructor-arg ref="view"/>
     </bean>
-    -->
 </beans>
