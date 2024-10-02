@@ -3,17 +3,17 @@ package View;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.DateTimeFormatter;
 import java.util.InputMismatchException;
+import java.time.LocalDate;
 import java.util.List;
 
 import Model.DAO.OrdersDAOImpl;
+import View.UserIO.UserIOImpl;
 import Model.DAO.ProductsDAO;
 import Model.DAO.TaxesDAO;
 import Model.Order;
-import View.UserIO.UserIOImpl;
 
 /**
  * The {@code FlooringMasteryView} class provides a user interface for the Flooring Mastery application,
@@ -108,14 +108,17 @@ public class FlooringMasteryViewImpl implements View {
   public JSONObject editOrder() {
     JSONObject orderInfo = new JSONObject();
 
+    // Getting the date and order number from user
     introEditOrder(orderInfo);
 
+    // Infinite loop to continuously prompt for order updates until confirmed
     while(true) {
       orderInfo.put("name", getValidName("\nEnter New Customer's Name: ", true));
       orderInfo.put("state", getValidState("\nEnter New State (abbreviation): ", true));
       orderInfo.put("product type", getValidProductType("\nEnter New Product Type: ", true));
       orderInfo.put("area", getValidArea("\nEnter New Est. Area: ", true));
 
+      // Display the changes made to the user for confirmation
       userIOImpl.print("\n----------------+\n" +
               "Changes: \n" +
               "----------------+\n" +
@@ -126,18 +129,14 @@ public class FlooringMasteryViewImpl implements View {
               "\n-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --\n" +
               " * If the field is empty it means that field will remain as is.\n");
 
-      String shouldUpdate = userIOImpl.readString("Do you want to save these changes? (y/n): ");
-      if (shouldUpdate.equalsIgnoreCase("y")) {
-       break;
+      // Getting user permission to edit order
+      boolean yOrN = yesOrNo();
+
+      if (yOrN) {
+        break;
       } else {
         userIOImpl.print("   * No changes were made *");
-        orderInfo.remove("date");
-        orderInfo.remove("order number");
-        orderInfo.remove("name");
-        orderInfo.remove("state");
-        orderInfo.remove("product type");
-        orderInfo.remove("area");
-        return orderInfo;
+        return new JSONObject();
       }
     }
 
@@ -198,14 +197,32 @@ public class FlooringMasteryViewImpl implements View {
     userIOImpl.print("This is the order to be removed:");
     userIOImpl.print(order.toString());
 
-    String shouldUpdate = userIOImpl.readString(" * type 'y' for yes and 'n' for no *");
+    boolean yOrN = yesOrNo();
 
-    if (shouldUpdate.equals("y")) {
+    if (yOrN) {
       userIOImpl.print("\nOrder Removed");
       return true;
     }
     userIOImpl.print("\nAction Revoked");
     return false;
+  }
+
+  /**
+   * Prompts the user to answer a yes or no question regarding saving changes.
+   *
+   * @return true if the user confirms they want to save changes ('y' or 'Y'),
+   *         false if they indicate they do not want to save changes ('n' or 'N').
+   */
+  private boolean yesOrNo() {
+    String input = "";
+
+    // Check for valid input: either 'y', 'Y', 'n', or 'N'
+    while (!input.equalsIgnoreCase("n") && !input.equalsIgnoreCase("y")) {
+      input = userIOImpl.readString("Do you want to save these changes? (y/n): ");
+    }
+
+    // Return true if the user responded with 'y', otherwise return false
+    return input.equals("y");
   }
 
   // Input Getters ---------------------------------------------------------------------------------
@@ -221,12 +238,13 @@ public class FlooringMasteryViewImpl implements View {
     LocalDate date;
     int count = 0;
 
+    // Allow the user up to 3 attempts to enter a valid date
     while (count < 3) {
       stringDate = userIOImpl.readString("Please Enter An Existing Order Date [MM/DD/YYYY]:");
 
       if (stringDate.isEmpty()) {
         userIOImpl.print("    * Input cannot be empty. Please try again. *\n");
-        continue;
+        continue; // Go back to the start of the loop for another attempt
       }
 
       try {
@@ -234,8 +252,8 @@ public class FlooringMasteryViewImpl implements View {
 
         if (!OrdersDAOImpl.orderStorage.containsKey(date)) {
           userIOImpl.print("    * Date does not exist in database. Please try again. *\n");
-          count ++;
-          continue;
+          count ++; // Increment attempt counter if the date is not found
+          continue; // Continue to the next iteration for another attempt
         }
 
         return stringDate;
@@ -245,7 +263,7 @@ public class FlooringMasteryViewImpl implements View {
       }
     }
     userIOImpl.print("    * Infinite loop break *");
-    return "";
+    return "";  // Return an empty string if no valid date was entered after 3 attempts
   }
 
   /**
@@ -268,12 +286,12 @@ public class FlooringMasteryViewImpl implements View {
 
         if (!date.isAfter(currDate)) {
           userIOImpl.print("    * The date must be set in the future - please enter a valid date. *\n");
-          continue;
+          continue; // Continue to the next iteration for another attempt
         }
 
       } catch (DateTimeParseException e) {
         userIOImpl.print("    * Invalid date format. Please enter the date in MM/DD/YYYY format. *\n");
-        continue;
+        continue; // Continue to the next iteration for another attempt
       }
 
       return stringDate;
@@ -298,9 +316,10 @@ public class FlooringMasteryViewImpl implements View {
         userIOImpl.readString("");
 
       } catch (InputMismatchException e) {
+        // Handle the case where the input is not an integer
         userIOImpl.print("  * Invalid input - must be int *\n");
         userIOImpl.readString("");
-        continue;
+        continue; // Continue to the next iteration for another attempt
       }
 
       List<Order> ordersForDate = OrdersDAOImpl.orderStorage.get(existingDate);
@@ -327,9 +346,14 @@ public class FlooringMasteryViewImpl implements View {
     while(true) {
       name = userIOImpl.readString(prompt);
 
+      // If the name can be empty and the user provided an empty string
       if (canBeEmpty && name.isEmpty()) {
         return " ";
+
+        // Check if the name contains only letters, numbers, and spaces
       } else if (name.matches("[a-zA-Z0-9 ]+")) {
+
+        // Trim the name and check if it is empty after trimming
         if (name.trim().isEmpty()) {
           userIOImpl.print("    * The customer's name may not be empty - please try again. *\n");
           continue;
@@ -341,6 +365,8 @@ public class FlooringMasteryViewImpl implements View {
               "- please enter a valid name. *\n");
     }
   }
+
+  // The rest of the methods follow a similar set up //
 
   /**
    * Prompts the user to enter a state abbreviation and validates the input.

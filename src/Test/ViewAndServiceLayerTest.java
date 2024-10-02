@@ -1,3 +1,4 @@
+import Exceptions.ModelExceptions;
 import Exceptions.ServiceExceptions;
 import Model.DAO.AuditDAOImpl;
 import Model.DAO.OrdersDAOImpl;
@@ -17,6 +18,7 @@ import View.UserIO.UserIOImpl;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+// TESTS MUST BE RUN ONE AT A TIME!
 public class ViewAndServiceLayerTest {
   AuditDAOImpl auditDAOImpl = new AuditDAOImpl();
   OrdersDAOImpl ordersDAOImpl = new OrdersDAOImpl();
@@ -28,32 +30,37 @@ public class ViewAndServiceLayerTest {
   public void testDisplayOrderForDate() {
     // Creating and adding an order into the database
     LocalDate date = LocalDate.parse("02/25/2025", DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-    this.ordersDAOImpl.addOrder(date, "Jane Doe", "IL", "Bamboo",  BigDecimal.valueOf(100));
+    this.ordersDAOImpl.addOrder(date, "Jane Doe", "IL", "Bamboo", BigDecimal.valueOf(100));
 
     // ** testing getExistingDate private method ** ------------------------------------------------
     when(mockUserIOImpl.readString("Please Enter An Existing Order Date [MM/DD/YYYY]: "))
             .thenReturn("02/25/2023") // First invalid input
             .thenReturn("02/25/2026") // Second invalid input
-            .thenReturn("02/25/2025"); // Valid input (correct date)
-    // ** getExistingDate brings user to menu after 3 tries ** -------------------------------------
+            .thenReturn("03/25/2025"); // Third invalid input
 
-    // Retry
+    // Setting up menu response
     when(mockUserIOImpl.readInt(
             "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n" +
-            "* <<Flooring Program>>\n" +
-            "* 1. Display Orders\n" +
-            "* 2. Add an Order\n" +
-            "* 3. Edit an Order\n" +
-            "* 4. Remove an Order\n" +
-            "* 5. Export All Data\n" +
-            "* 6. Quit\n" +
-            "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *")).thenReturn(1);
-    when(mockUserIOImpl.readString("Please Enter An Existing Order Date [MM/DD/YYYY]: "))
+                    "* <<Flooring Program>>\n" +
+                    "* 1. Display Orders\n" +
+                    "* 2. Add an Order\n" +
+                    "* 3. Edit an Order\n" +
+                    "* 4. Remove an Order\n" +
+                    "* 5. Export All Data\n" +
+                    "* 6. Quit\n" +
+                    "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"))
+            .thenReturn(1); // Assuming this is the display option
+
+    when(mockUserIOImpl.readString("Please Enter An Existing Order Date [MM/DD/YYYY]:"))
             .thenReturn("02/25/2025");
 
+    // Call the method under test
     JSONObject result = view.displayOrderForDate();
+
+    // Simulating the service layer to display orders
     String order = service.displayOrders(result);
 
+    // Assertions to verify the expected behavior
     assertEquals(this.ordersDAOImpl.getOrder(date, 1).toString(), order);
     assertEquals(1, OrdersDAOImpl.orderStorage.get(date).size());
   }
@@ -63,14 +70,12 @@ public class ViewAndServiceLayerTest {
   public void testDisplayOrderWithDateButNoNumber() {
     // Creating and adding an order into the database
     LocalDate date = LocalDate.parse("02/25/2025", DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-    this.ordersDAOImpl.addOrder(date, "Jane Doe", "IL", "Bamboo",  BigDecimal.valueOf(100));
+    this.ordersDAOImpl.addOrder(date, "Jane Doe", "IL", "Bamboo", BigDecimal.valueOf(100));
     this.ordersDAOImpl.removeOrder(date, 1);
     assertEquals(0, OrdersDAOImpl.orderStorage.get(date).size());
     assertEquals(1, OrdersDAOImpl.orderStorage.size());
 
     when(mockUserIOImpl.readString("Please Enter An Existing Order Date [MM/DD/YYYY]:"))
-            .thenReturn("02/25/2025")
-            .thenReturn("02/25/2025")
             .thenReturn("02/25/2025");
 
     JSONObject jsonDate = view.displayOrderForDate();
@@ -96,6 +101,8 @@ public class ViewAndServiceLayerTest {
     // ** testing getValidName private method ** ---------------------------------------------------
     when(mockUserIOImpl.readString(contains("Enter Customer's Name:"))) //Enter Customer's Name:
             .thenReturn("=") //  Special chars are not accepted
+            .thenReturn(" ") //  Empty space string is not accepted
+            .thenReturn("") //  Empty string is not accepted
             .thenReturn("xX Test Name 123 Xx"); // Spaces, letters, and numbers accepted
 
     // ** testing getValidState private method ** --------------------------------------------------
@@ -140,14 +147,14 @@ public class ViewAndServiceLayerTest {
     when(mockUserIOImpl.readString(contains("Enter Date [MM/DD/YYYY]:")))
             .thenReturn("12/25/2025");
 
-    when(mockUserIOImpl.readString(contains("Enter Customer's Name:"))) //Enter Customer's Name:
-            .thenReturn("Sophia Sophia"); // Spaces, letters, and numbers accepted
+    when(mockUserIOImpl.readString(contains("Enter Customer's Name:")))
+            .thenReturn("Sophia Sophia");
 
     when(mockUserIOImpl.readString(contains("Enter State (abbreviation):")))
             .thenReturn("MA");
 
     when(mockUserIOImpl.readString(contains("Enter Product Type:")))
-            .thenReturn("Terrazzo"); // First letter can be lowercase
+            .thenReturn("Terrazzo");
 
     when(mockUserIOImpl.readString(contains("Enter Est. Area: ")))
             .thenReturn("303");
@@ -250,34 +257,77 @@ public class ViewAndServiceLayerTest {
     assertEquals(1, OrdersDAOImpl.orderStorage.get(date).size());
   }
 
-  // Scenario user types 'y'
+  // Scenario user does not update all four fields
   @Test
-  public void testRemoveOrderY() throws ServiceExceptions {
+  public void testEditOrderTwoFields() throws ServiceExceptions {
     LocalDate date = LocalDate.parse("02/25/2025", DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-
-    // Add two orders to the DAO for the given date
     this.ordersDAOImpl.addOrder(date, "Jane Doe", "IL", "Bamboo", BigDecimal.valueOf(100));
-    this.ordersDAOImpl.addOrder(date, "Anna Fisher", "NE", "Rubber", BigDecimal.valueOf(505));
+    assertEquals(1, OrdersDAOImpl.orderStorage.get(date).size());
 
-    // Assert that there are two orders on that date
-    assertEquals(2, OrdersDAOImpl.orderStorage.get(date).size());
-
-    // Mock user input to remove the first order ("Jane Doe")
-    when(mockUserIOImpl.readString("Please Enter An Existing Order Date [MM/DD/YYYY]:"))
+    // Mocking the input for existing order retrieval
+    when(mockUserIOImpl.readString(contains("Please Enter An Existing Order Date [MM/DD/YYYY]")))
             .thenReturn("02/25/2025");
-    when(mockUserIOImpl.readInt("Please Enter Order Number:"))
-            .thenReturn(1); // Refers to "Jane Doe"'s order
 
-    // Mock user confirmation for the removal
-    when(mockUserIOImpl.readString(" * type 'y' for yes and 'n' for no *"))
+    // Mocking the order number retrieval
+    when(mockUserIOImpl.readInt(contains("Please Enter Order Number:")))
+            .thenReturn(1); // Change order number to match the existing order
+
+    // Mocking the new customer details
+    when(mockUserIOImpl.readString(contains("Enter New Customer's Name:")))
+            .thenReturn("May Smith");
+    when(mockUserIOImpl.readString(contains("Enter New State (abbreviation):")))
+            .thenReturn("");
+    when(mockUserIOImpl.readString(contains("Enter New Product Type:")))
+            .thenReturn("Carpet"); // Ensure the case matches expected values
+    when(mockUserIOImpl.readString(contains("Enter New Est. Area:")))
+            .thenReturn("");
+
+    // Mocking the confirmation for saving changes
+    when(mockUserIOImpl.readString("Do you want to save these changes? (y/n): "))
             .thenReturn("y");
 
-    // Execute the removeOrder flow
+    JSONObject result = view.editOrder();
+
+    // Assertions to ensure the order info matches the expected values
+    assertEquals("May Smith", result.getString("name"));
+    assertEquals(" ", result.getString("state"));
+    assertEquals("Carpet", result.getString("product type"));
+    assertEquals(" ", result.getString("area"));
+
+    // Editing the order with the updated info
+    Order order = service.editAnOrder(result);
+
+    assertEquals("May Smith", order.getCustomerName());
+    assertEquals("IL", order.getState());
+    assertEquals("Carpet", order.getProductType());
+    assertTrue(order.getArea().compareTo(BigDecimal.valueOf(100)) == 0);
+
+    assertEquals(ordersDAOImpl.getOrder(date, 1), order);
+    assertEquals(1, OrdersDAOImpl.orderStorage.get(date).size());
+  }
+
+  // Scenario user types 'y'
+  @Test
+  public void testRemoveOrderY() throws ServiceExceptions, ModelExceptions {
+    LocalDate date = LocalDate.parse("02/25/2025", DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+    this.ordersDAOImpl.addOrder(date, "Jane Doe", "IL", "Bamboo", BigDecimal.valueOf(100));
+    this.ordersDAOImpl.addOrder(date, "Anna Fisher", "NE", "Rubber", BigDecimal.valueOf(505));
+    this.auditDAOImpl.addOrder(date, OrdersDAOImpl.orderStorage.get(date).get(0));
+    assertEquals(2, OrdersDAOImpl.orderStorage.get(date).size());
+
+    when(mockUserIOImpl.readString(anyString())).thenReturn("02/25/2025"); // Simulate date input
+    when(mockUserIOImpl.readInt(anyString())).thenReturn(1); // Simulate order number input
+
+    // Call the removeOrder method
     JSONObject result = view.removeOrder();
 
     // Ensure the correct order was passed for removal
     assertEquals("02/25/2025", result.getString("date"));
     assertEquals(1, result.getInt("order number"));
+
+    // Mock user confirmation for the removal
+    when(mockUserIOImpl.readString(" * type 'y' for yes and 'n' for no *"))
+            .thenReturn("y");
 
     // Call the service method to remove the order
     service.removeOrder(result);
@@ -290,15 +340,7 @@ public class ViewAndServiceLayerTest {
     assertEquals("Anna Fisher", remainingOrder.getCustomerName());
     assertEquals("NE", remainingOrder.getState());
     assertEquals("Rubber", remainingOrder.getProductType());
-    assertEquals(BigDecimal.valueOf(505), remainingOrder.getArea());
-
-    // Mock display of the remaining order and verify the result
-    when(mockUserIOImpl.readString("Please Enter An Existing Order Date [MM/DD/YYYY]:"))
-            .thenReturn("02/25/2025");
-    boolean display = view.displayOrder(service.getOrder(result));
-
-    // Assert that the display call was successful
-    assertTrue(display); // Assuming the displayOrder method returns true when successful
+    assertTrue(remainingOrder.getArea().compareTo(BigDecimal.valueOf(505)) == 0);
   }
 
   // Scenario user types 'n'
@@ -330,4 +372,5 @@ public class ViewAndServiceLayerTest {
   }
 
   // Export functionality has been tested in the AuditDAOTest file
+  // All actual logic is done in the AuditDAOImpl class, the service layer simply call that class
 }

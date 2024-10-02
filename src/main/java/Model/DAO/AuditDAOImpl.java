@@ -2,19 +2,19 @@ package Model.DAO;
 
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.File;
+import java.time.format.DateTimeFormatter;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.math.BigDecimal;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.Scanner;
+import java.util.List;
+import java.io.File;
 
 import Exceptions.ModelExceptions;
 import Model.Order;
@@ -96,8 +96,10 @@ public class AuditDAOImpl implements AuditDAO {
 
       while (reader.hasNext()) {
         String currLine = reader.nextLine();
+        // Split the line into fields using comma as the delimiter
         String[] fields = currLine.split(",");
 
+        // Check if the current line's order number matches the order to be edited
         if (Integer.valueOf(fields[0]) == order.getOrderNumber()) {
           String formatted = order.getOrderNumber() + "," + order.getCustomerName() + "," +
                   order.getState() + "," + order.getTaxRate() + "," +
@@ -105,17 +107,20 @@ public class AuditDAOImpl implements AuditDAO {
                   order.getCostPerSquareFoot() + "," + order.getLaborCostPerSquareFoot() + "," +
                   order.getMaterialCost() + "," + order.getLaborCost() + "," +
                   order.getTax() + "," + order.getTotal();
-          remainingLines.add(formatted);
+          remainingLines.add(formatted); // Add the formatted string to the list of remaining lines
         } else {
+          // If the order number does not match, keep the original line
           remainingLines.add(currLine);
         }
       }
       reader.close();
       writer = new PrintWriter(new FileWriter(file));
 
+      // Write all lines (updated and unchanged) back to the file
       for (String line : remainingLines) {
         writer.println(line);
       }
+
       writer.close();
     } catch (IOException e) {
       throw new ModelExceptions("File: " + "Orders_" + dateToString(date) + ".txt does not exist");
@@ -150,6 +155,7 @@ public class AuditDAOImpl implements AuditDAO {
       reader.close();
       writer = new PrintWriter(new FileWriter(file));
 
+      // Write all lines (updated and unchanged) back to the file
       for (String line : remainingLines) {
         writer.println(line);
       }

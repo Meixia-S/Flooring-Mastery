@@ -1,15 +1,14 @@
 package Controller;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.json.JSONObject;
 
 import java.util.InputMismatchException;
 
 import Exceptions.ServiceExceptions;
 import Service.FlooringMasteryServiceImpl;
 import View.FlooringMasteryViewImpl;
-import software.amazon.ion.SystemSymbols;
 
 /**
  * The {@code FlooringMasteryController} class serves as the controller in the MVC
@@ -47,7 +46,7 @@ public class FlooringMasteryController {
     while(true) {
       try {
         choice = view.displayMenu();
-      } catch (InputMismatchException e) {
+      } catch (InputMismatchException e) { // ensures the user input for the menu is valid
         view.userIOImpl.print("     *** Please Input an Integer ***");
         view.userIOImpl.clearScannerBuffer();
         continue;
@@ -57,7 +56,7 @@ public class FlooringMasteryController {
         case 1: // Display order for a given date
           JSONObject date = view.displayOrderForDate();
           if (date.getString("date").isEmpty()) {
-            break;
+            break;  // if date is empty there is nothing to display - how the view communicates that
           }
           String result = service.displayOrders(date);
           view.userIOImpl.print(result);
@@ -66,27 +65,27 @@ public class FlooringMasteryController {
           try {
             view.userIOImpl.print(service.addOrder(view.addOrder()).toString());
           } catch (ServiceExceptions e) {
-            throw new RuntimeException(e);
+            view.userIOImpl.print(String.valueOf(e));
           }
           break;
         case 3: // Edit an existing order
           try {
-            JSONObject orderInfo = view.editOrder();
+            JSONObject orderInfo = view.editOrder(); // if JSON object is empty that means user typed 'n'
             if (orderInfo.length() != 0) {
               view.userIOImpl.print(service.editAnOrder(orderInfo).toString());
             }
           } catch (ServiceExceptions e) {
-            throw new RuntimeException(e);
+            view.userIOImpl.print(String.valueOf(e));
           }
           break;
         case 4: // Remove an order
           JSONObject orderInfo = view.removeOrder();
           boolean shouldRemove = view.displayOrder(service.getOrder(orderInfo));
-          if (shouldRemove) {
+          if (shouldRemove) { // checks to see if the user typed 'y' before editing the database & files
             try {
               service.removeOrder(orderInfo);
             } catch (ServiceExceptions e) {
-              view.userIOImpl.print("Error involving file paths");
+              view.userIOImpl.print(String.valueOf(e));
             }
           }
           break;
@@ -95,7 +94,7 @@ public class FlooringMasteryController {
             service.exportAllData();
             view.userIOImpl.print(" * Check the 'DataExport.txt' file in the 'Backup' folder for the complete order list *");
           } catch (ServiceExceptions e) {
-            throw new RuntimeException(e);
+            view.userIOImpl.print(String.valueOf(e));
           }
           break;
         case 6: // Quit program

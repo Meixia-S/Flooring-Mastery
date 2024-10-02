@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
+import Model.DAO.OrdersDAOImpl;
 import Model.Order;
 import Model.DAO.AuditDAOImpl;
 import Exceptions.ModelExceptions;
@@ -17,6 +18,7 @@ class AuditDAOImplTest {
 
   private AuditDAOImpl auditDAOImpl;
   private static final LocalDate TEST_DATE = LocalDate.of(2024, 9, 30);
+  private static final LocalDate TEST_DATE_TWO = LocalDate.of(2024, 10, 30);
   private static final String TEST_ORDER_FILE_PATH = "src\\main\\java\\Files\\Orders_" + dateToString(TEST_DATE) + ".txt";
   private static final String BACKUP_FILE_PATH = "src\\main\\java\\Files\\Backup\\DataExport.txt";
 
@@ -101,7 +103,7 @@ class AuditDAOImplTest {
   }
 
   @Test
-  public void testRemoveOrder() throws ModelExceptions, IOException {
+  public void testRemoveOrderOneOrder() throws ModelExceptions, IOException {
     // Create an order and add it to the file
     Order order = new Order(1, "John Doe", "FL", "Tile", BigDecimal.valueOf(100));
     auditDAOImpl.addOrder(TEST_DATE, order);
@@ -119,12 +121,37 @@ class AuditDAOImplTest {
   }
 
   @Test
+  public void testRemoveOrderTwoOrders() throws ModelExceptions, IOException {
+    // Create an order and add it to the file
+    Order order = new Order(1, "John Doe", "FL", "Tile", BigDecimal.valueOf(100));
+    Order order2 = new Order(2, "Jane Doe", "MI", "Wood", BigDecimal.valueOf(100));
+    auditDAOImpl.addOrder(TEST_DATE, order);
+    auditDAOImpl.addOrder(TEST_DATE, order2);
+
+    // Remove the order from the file
+    auditDAOImpl.removeOrder(TEST_DATE, order.getOrderNumber());
+
+    // Verify that the order was removed from the file
+    File testOrderFile = new File(TEST_ORDER_FILE_PATH);
+    assertTrue(testOrderFile.exists());
+
+    try (Scanner scanner = new Scanner(testOrderFile)) {
+      assertTrue(scanner.hasNextLine());
+      String firstLine = scanner.nextLine();
+      assertNotNull(firstLine);
+      assertFalse(scanner.hasNextLine());
+    }
+  }
+
+  @Test
   public void testExport() throws ModelExceptions, IOException {
     // Create two orders and add them to the file
     Order order1 = new Order(1, "John Doe", "FL", "Tile", BigDecimal.valueOf(100));
     Order order2 = new Order(2, "Jane Doe", "OH", "Wood", BigDecimal.valueOf(200));
+
+    // Creating two files
     auditDAOImpl.addOrder(TEST_DATE, order1);
-    auditDAOImpl.addOrder(TEST_DATE, order2);
+    auditDAOImpl.addOrder(TEST_DATE_TWO, order2);
 
     // Perform export operation
     auditDAOImpl.export();

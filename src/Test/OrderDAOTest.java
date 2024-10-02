@@ -18,7 +18,7 @@ public class OrderDAOTest {
   AuditDAOImpl auditDAOImpl = new AuditDAOImpl();
 
   @Test
-  public void testDisplayOrders() throws ModelExceptions {
+  public void testDisplayOrders() {
     OrdersDAOImpl ordersDAOImpl = new OrdersDAOImpl();
     LocalDate date = LocalDate.of(2024, 9, 25);
 

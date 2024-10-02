@@ -1,17 +1,17 @@
 package Service;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.json.JSONObject;
 
+import java.time.format.DateTimeFormatter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 import Exceptions.ModelExceptions;
 import Exceptions.ServiceExceptions;
-import Model.DAO.AuditDAOImpl;
 import Model.DAO.OrdersDAOImpl;
+import Model.DAO.AuditDAOImpl;
 import Model.Order;
 
 /**
@@ -78,6 +78,7 @@ public class FlooringMasteryServiceImpl implements Service {
       auditDAOImpl.addOrder(date, order);
       return order;
     } catch (ModelExceptions e) {
+      // All these catches in this class mainly catch IOExceptions and FileNotFoundExceptions
       throw new ServiceExceptions(e);
     }
   }

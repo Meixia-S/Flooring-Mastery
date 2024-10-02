@@ -2,12 +2,12 @@ package Model.DAO;
 
 import org.springframework.stereotype.Component;
 
+import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import Exceptions.ModelExceptions;
 import Model.Order;
@@ -83,12 +83,14 @@ public class OrdersDAOImpl implements OrdersDAO {
     if (orderStorage.containsKey(date)) {
       List<Order> ordersForDate = orderStorage.get(date);
 
+      // Goes through the ordersForDate list, finds the order and then executes the update method
       return ordersForDate.stream()
               .filter(order -> order.getOrderNumber() == orderNum)
               .findFirst()
               .map(order -> update(edits, order))
               .orElse(null);
     }
+    // This should never be thrown as the date and order number should always exist in the database
     throw new ModelExceptions("Order number " + orderNum + " not found for the specified date.");
   }
 
@@ -135,17 +137,19 @@ public class OrdersDAOImpl implements OrdersDAO {
       List<Order> ordersForDate = orderStorage.get(date);
       int index = -1;
 
+      // Iterate through the list of orders to find the order with the specified order number
+      // * Altering the list while traversing over it can cause errors!
       for (int i = 0; i < ordersForDate.size(); i++) {
         if (ordersForDate.get(i).getOrderNumber() == orderNum) {
-          order = ordersForDate.get(i);
-          index = i;
+          order = ordersForDate.get(i); // Stores the order object
+          index = i; // Stores the index of the order
           break;
         }
       }
 
       if (index != -1) {
-        ordersForDate.remove(index);
-        orderStorage.put(date, ordersForDate);
+        ordersForDate.remove(index); // Removes the order with the stores index
+        orderStorage.put(date, ordersForDate); // Updates the storage map
       }
     }
     return order;
