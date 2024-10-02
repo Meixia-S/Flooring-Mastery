@@ -1,22 +1,67 @@
 package Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import org.json.JSONObject;
+
+import Exceptions.ServiceExceptions;
+import Model.Order;
 
 public interface IService {
+  /**
+   * Displays all orders for a specified date.
+   *
+   * @param ordersDate a {@code JSONObject} containing the date for which orders
+   *                   are to be displayed
+   * @return a string representation of all orders for the specified date
+   * @throws ServiceExceptions if the specified date does not exist in the
+   *                           database or if an error occurs while retrieving
+   *                           the orders
+   */
+  public String displayOrders(JSONObject ordersDate) throws ServiceExceptions;
 
-  public void displayOrders();
+  /**
+   * Adds a new order based on the provided order information.
+   *
+   * @param orderInfo a {@code JSONObject} containing the details of the order
+   *                  to be added
+   * @return the newly created {@code Order} object
+   * @throws ServiceExceptions if an error occurs while adding the order or
+   *                           if the file is not found
+   */
+  public Order addOrder(JSONObject orderInfo) throws ServiceExceptions;
 
-  // Order Date – Must be in the future
-  //Customer Name – May not be blank and is limited to characters [a-z][0-9] as well as periods and comma characters. "Acme, Inc." is a valid name.
-  //State – Entered states must be checked against the tax file. If the state does not exist in the tax file, we cannot sell there. If the tax file is modified to include the state, it should be allowed without changing the application code.
-  //Product Type – Show a list of available products and pricing information to choose from. Again, if a product is added to the file it should show up in the application without a code change.
-  //Area – The area must be a positive decimal. Minimum order size is 100 sq ft.
-  public void addOrder(LocalDate date, String customerName, String state, String productType, BigDecimal area);
+  /**
+   * Edits an existing order based on the provided new order information.
+   *
+   * @param newOrderInfo a {@code JSONObject} containing the updated details
+   *                     of the order
+   * @return the updated {@code Order} object
+   * @throws ServiceExceptions if an error occurs while editing the order
+   */
+  public Order editAnOrder(JSONObject newOrderInfo) throws ServiceExceptions;
 
-  public void editAnOrder(LocalDate date, int orderNum, String edits);
+  /**
+   * Removes an existing order based on the provided order information.
+   *
+   * @param orderInfo a {@code JSONObject} containing the details of the order
+   *                  to be removed
+   * @throws ServiceExceptions if an error occurs while removing the order
+   */
+  public void removeOrder(JSONObject orderInfo) throws ServiceExceptions;
 
-  public void removeOrder(LocalDate date, int orderNum);
+  /**
+   * Retrieves a specific order based on the provided order information.
+   *
+   * @param orderInfo a {@code JSONObject} containing the details of the order
+   *                  to be retrieved
+   * @return the {@code Order} object if found
+   * @throws RuntimeException if an error occurs while retrieving the order
+   */
+  public Order getOrder(JSONObject orderInfo);
 
-  public void exportALlDate();
+  /**
+   * Exports all data to the 'DataExport' file.
+   *
+   * @throws ServiceExceptions if an error occurs while exporting the data
+   */
+  public void exportAllData() throws ServiceExceptions;
 }

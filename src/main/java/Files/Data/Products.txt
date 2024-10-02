@@ -1,0 +1,15 @@
+Bamboo, 3.95, 4.20
+Carpet, 2.25, 2.10
+Concrete, 4.50, 5.00
+Cork, 3.50, 3.75
+Granite, 6.00, 6.25
+Laminate, 1.75, 2.10
+Linoleum, 2.00, 2.25
+Marble, 7.75, 7.00
+Rubber, 2.65, 3.00
+Slate, 5.50, 5.75
+Stone, 7.25, 6.50
+Terrazzo, 6.50, 6.00
+Tile, 3.50, 4.15
+Vinyl, 1.85, 1.90
+Wood, 5.15, 4.75
