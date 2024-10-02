@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class AuditDAOImplTest {
 
   private AuditDAOImpl auditDAOImpl;
-  private static final LocalDate TEST_DATE = LocalDate.of(2024, 9, 30);
+  private static final LocalDate TEST_DATE = LocalDate.of(2025, 9, 30);
   private static final LocalDate TEST_DATE_TWO = LocalDate.of(2024, 10, 30);
   private static final String TEST_ORDER_FILE_PATH = "src\\main\\java\\Files\\Orders_" + dateToString(TEST_DATE) + ".txt";
-  private static final String BACKUP_FILE_PATH = "src\\main\\java\\Files\\Backup\\DataExport.txt";
+  private static final String BACKUP_FILE_PATH = "src\\main\\java\\Files\\Backup\\TestDataExport.txt";
 
   @BeforeEach
   public void setUp() throws IOException {
@@ -167,9 +167,11 @@ class AuditDAOImplTest {
       assertTrue(line1.contains("John Doe"));
       assertTrue(line1.contains("1"));
       assertTrue(line1.contains("FL"));
+      assertTrue(line1.contains("09-30-2025"));
       assertTrue(line2.contains("Jane Doe"));
       assertTrue(line2.contains("2"));
       assertTrue(line2.contains("OH"));
+      assertTrue(line2.contains("10-30-2024"));
     }
   }
 
