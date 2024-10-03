@@ -451,11 +451,18 @@ public class FlooringMasteryViewImpl implements View {
 
       if (canBeEmpty && area.isEmpty()) {
         return " ";
-      } else if (Integer.valueOf(area) < 1) {
-        userIOImpl.print("    * The area must be positive - please enter a positive number. *\n");
-        continue;
-      } else if (Integer.valueOf(area) < this.MIN_ORDER_AREA && Integer.valueOf(area) > 1) {
-        userIOImpl.print("    * The minimum area is 100 - please enter a number at or above 100. *\n");
+      }
+
+      try {
+        if (Integer.valueOf(area) < 1) {
+          userIOImpl.print("    * The area must be positive - please enter a positive number. *\n");
+          continue;
+        } else if (Integer.valueOf(area) < this.MIN_ORDER_AREA && Integer.valueOf(area) > 1) {
+          userIOImpl.print("    * The minimum area is 100 - please enter a number at or above 100. *\n");
+          continue;
+        }
+      } catch (InputMismatchException | NumberFormatException e) {
+        userIOImpl.print("    * Area must be an integer. *\n");
         continue;
       }
       return area;
