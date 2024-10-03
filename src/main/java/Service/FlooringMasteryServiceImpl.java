@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import Exceptions.ModelExceptions;
 import Exceptions.ServiceExceptions;
 import Model.DAO.OrdersDAOImpl;
-import Model.DAO.AuditDAOImpl;
+import Model.DAO.FileDAOImpl;
 import Model.Order;
 
 /**
@@ -22,7 +22,7 @@ import Model.Order;
 @Component
 public class FlooringMasteryServiceImpl implements Service {
   private OrdersDAOImpl ordersDAOImpl;
-  private AuditDAOImpl auditDAOImpl;
+  private FileDAOImpl auditDAOImpl;
 
   /**
    * Constructs a new {@code FlooringMasteryService} with the specified
@@ -32,7 +32,7 @@ public class FlooringMasteryServiceImpl implements Service {
    * @param auditDAOImpl  the data access object for audit operations
    */
   @Autowired
-  public FlooringMasteryServiceImpl(OrdersDAOImpl ordersDAOImpl, AuditDAOImpl auditDAOImpl) {
+  public FlooringMasteryServiceImpl(OrdersDAOImpl ordersDAOImpl, FileDAOImpl auditDAOImpl) {
     this.ordersDAOImpl = ordersDAOImpl;
     this.auditDAOImpl = auditDAOImpl;
    //LocalDate date = LocalDate.parse("02/25/2025", DateTimeFormatter.ofPattern("MM/dd/yyyy"));

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Exceptions.ModelExceptions;
-import Model.DAO.AuditDAOImpl;
+import Model.DAO.FileDAOImpl;
 import Model.DAO.OrdersDAOImpl;
 import Model.Order;
 
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OrderDAOTest {
-  AuditDAOImpl auditDAOImpl = new AuditDAOImpl();
+  FileDAOImpl auditDAOImpl = new FileDAOImpl();
 
   @Test
   public void testDisplayOrders() {

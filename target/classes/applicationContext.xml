@@ -25,7 +25,7 @@
     <bean id="orderDAO"
           class="Model.DAO.OrdersDAOImpl"/>
     <bean id="auditDao"
-          class="Model.DAO.AuditDAOImpl"/>
+          class="Model.DAO.FileDAOImpl"/>
     <bean id="serviceLayer"
           class="Service.FlooringMasteryServiceImpl">
         <constructor-arg ref="orderDAO"/>

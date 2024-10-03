@@ -371,7 +371,7 @@ public class FlooringMasteryViewImpl implements View {
     }
   }
 
-  // The rest of the methods follow a similar set up //
+  // The rest of the methods follow a similar setup //
 
   /**
    * Prompts the user to enter a state abbreviation and validates the input.

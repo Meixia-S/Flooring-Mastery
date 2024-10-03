@@ -1,6 +1,6 @@
 import Exceptions.ModelExceptions;
 import Exceptions.ServiceExceptions;
-import Model.DAO.AuditDAOImpl;
+import Model.DAO.FileDAOImpl;
 import Model.DAO.OrdersDAOImpl;
 import Model.Order;
 import org.json.JSONObject;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 
 // TESTS MUST BE RUN ONE AT A TIME!
 public class ViewAndServiceLayerTest {
-  AuditDAOImpl auditDAOImpl = new AuditDAOImpl();
+  FileDAOImpl auditDAOImpl = new FileDAOImpl();
   OrdersDAOImpl ordersDAOImpl = new OrdersDAOImpl();
   private FlooringMasteryServiceImpl service = new FlooringMasteryServiceImpl(ordersDAOImpl, auditDAOImpl);
   private UserIOImpl mockUserIOImpl = Mockito.mock(UserIOImpl.class);

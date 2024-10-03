@@ -14,7 +14,7 @@ import Model.Order;
  * data files. Implementations of this interface will ensure that order data
  * is handled consistently and reliably throughout the application.
  */
-public interface AuditDAO {
+public interface FileDAO {
 
   /**
    * Adds a new order to the corresponding orders file for the specified date.

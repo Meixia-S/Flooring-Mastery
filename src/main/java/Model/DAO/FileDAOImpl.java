@@ -30,7 +30,7 @@ import Model.Order;
  * and persistence of order-related data in the application.
  */
 @Component
-public class AuditDAOImpl implements AuditDAO {
+public class FileDAOImpl implements FileDAO {
   private Scanner reader;
   private PrintWriter writer;
 
@@ -38,7 +38,7 @@ public class AuditDAOImpl implements AuditDAO {
    * Constructs an {@code AuditDAO} and initializes product and tax information
    * by reading from the respective data files.
    */
-  public AuditDAOImpl() {
+  public FileDAOImpl() {
     try {
       getProductInfo("src\\main\\java\\DataFiles\\Products.txt");
       getTaxInfo("src\\main\\java\\DataFiles\\Taxes.txt");
@@ -175,7 +175,18 @@ public class AuditDAOImpl implements AuditDAO {
   @Override
   public void export() throws ModelExceptions {
     try {
-      writer = new PrintWriter(new FileWriter("src\\main\\java\\Orders\\Backup\\DataExport.txt"));
+      String userHome = System.getProperty("user.home");
+      File ordersDir = new File(userHome, "Documents/Backup");
+
+      if (!ordersDir.exists()) {
+        boolean dirCreated = ordersDir.mkdir();
+        if (!dirCreated) {
+          throw new ModelExceptions("Application unable to create Backup directory");
+        }
+      }
+
+      String fileName = new File(ordersDir, "DataExport.txt").getPath();
+      writer = new PrintWriter(new FileWriter(fileName));
       File[] files = new File("src\\main\\java\\Orders").listFiles();
 
       for (File filename : files) {
@@ -198,7 +209,7 @@ public class AuditDAOImpl implements AuditDAO {
       }
       writer.close();
     } catch (IOException e) {
-      throw new ModelExceptions("DataExport.txt file path changed");
+      throw new ModelExceptions("Order files path changed");
     }
   }
 

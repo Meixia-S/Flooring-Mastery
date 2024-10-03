@@ -7,25 +7,24 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
-import Model.DAO.OrdersDAOImpl;
 import Model.Order;
-import Model.DAO.AuditDAOImpl;
+import Model.DAO.FileDAOImpl;
 import Exceptions.ModelExceptions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AuditDAOImplTest {
+class FileDAOImplTest {
 
-  private AuditDAOImpl auditDAOImpl;
+  private FileDAOImpl auditDAOImpl;
   private static final LocalDate TEST_DATE = LocalDate.of(2025, 9, 30);
   private static final LocalDate TEST_DATE_TWO = LocalDate.of(2024, 10, 30);
-  private static final String TEST_ORDER_FILE_PATH = "src\\main\\java\\Files\\Orders_" + dateToString(TEST_DATE) + ".txt";
-  private static final String BACKUP_FILE_PATH = "src\\main\\java\\Files\\Backup\\TestDataExport.txt";
+  private static final String TEST_ORDER_FILE_PATH = "src\\main\\java\\Orders\\Orders_" + dateToString(TEST_DATE) + ".txt";
+  private static final String BACKUP_FILE_PATH = "Documents\\Backup";
 
   @BeforeEach
-  public void setUp() throws IOException {
+  public void setUp() {
     // Initialize AuditDAO
-    auditDAOImpl = new AuditDAOImpl();
+    auditDAOImpl = new FileDAOImpl();
 
     // Clean up test order file if exists
     File testOrderFile = new File(TEST_ORDER_FILE_PATH);
@@ -143,6 +142,7 @@ class AuditDAOImplTest {
     }
   }
 
+  // Must run as administrator!
   @Test
   public void testExport() throws ModelExceptions, IOException {
     // Create two orders and add them to the file
@@ -157,7 +157,8 @@ class AuditDAOImplTest {
     auditDAOImpl.export();
 
     // Verify that the backup file was created and contains the orders
-    File backupFile = new File(BACKUP_FILE_PATH);
+    String userHome = System.getProperty("user.home");
+    File backupFile = new File(userHome, "Documents/Backup");
     assertTrue(backupFile.exists());
 
     try (Scanner scanner = new Scanner(backupFile)) {
