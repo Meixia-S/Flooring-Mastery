@@ -119,6 +119,8 @@ public class ViewAndServiceLayerTest {
     when(mockUserIOImpl.readString(contains("Enter Est. Area: ")))
             .thenReturn("-1")  // Cannot be negative
             .thenReturn("0") // Cannot be zero
+            .thenReturn("one hundred") // Cannot be a String
+            .thenReturn("99") // Cannot be below 100
             .thenReturn("200");
 
     JSONObject result = view.addOrder();
