@@ -118,38 +118,33 @@ public class FlooringMasteryViewImpl implements View {
       return new JSONObject();
     }
 
-    // Infinite loop to continuously prompt for order updates until confirmed
-    while(true) {
-      orderInfo.put("name", getValidName("\nEnter New Customer's Name: ", true));
-      orderInfo.put("state", getValidState("\nEnter New State (abbreviation): ", true));
-      orderInfo.put("product type", getValidProductType("\nEnter New Product Type: ", true));
-      orderInfo.put("area", getValidArea("\nEnter New Est. Area: ", true));
+    orderInfo.put("name", getValidName("\nEnter New Customer's Name: ", true));
+    orderInfo.put("state", getValidState("\nEnter New State (abbreviation): ", true));
+    orderInfo.put("product type", getValidProductType("\nEnter New Product Type: ", true));
+    orderInfo.put("area", getValidArea("\nEnter New Est. Area: ", true));
 
-      // Display the changes made to the user for confirmation
-      userIOImpl.print("\n----------------+\n" +
-              "Changes: \n" +
-              "----------------+\n" +
-              "New Name: " + orderInfo.getString("name") + "\n" +
-              "New State: " + orderInfo.getString("state") + "\n" +
-              "New Product Type: " + orderInfo.getString("product type") + "\n" +
-              "New Area: " + orderInfo.getString("area") +
-              "\n-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --\n" +
-              " * If the field is empty it means that field will remain as is.\n");
+    // Display the changes made to the user for confirmation
+    userIOImpl.print("\n----------------+\n" +
+            "Changes: \n" +
+            "----------------+\n" +
+            "New Name: " + orderInfo.getString("name") + "\n" +
+            "New State: " + orderInfo.getString("state") + "\n" +
+            "New Product Type: " + orderInfo.getString("product type") + "\n" +
+            "New Area: " + orderInfo.getString("area") +
+            "\n-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --\n" +
+            " * If the field is empty it means that field will remain as is.\n");
 
-      // Getting user permission to edit order
-      boolean yOrN = yesOrNo();
+    // Getting user permission to edit order
+    boolean yOrN = yesOrNo();
 
-      if (yOrN) {
-        break;
-      } else {
-        userIOImpl.print("   * No changes were made *");
-        return new JSONObject();
-      }
+    if (yOrN) {
+      userIOImpl.print("\nHere is the updated order:");
+      userIOImpl.print("------------------------------");
+      return orderInfo;
+    } else {
+      userIOImpl.print("   * No changes were made *");
+      return new JSONObject();
     }
-
-    userIOImpl.print("\nHere is the updated order:");
-    userIOImpl.print("------------------------------");
-    return orderInfo;
   }
 
   /**

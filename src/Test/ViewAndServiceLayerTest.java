@@ -91,12 +91,12 @@ public class ViewAndServiceLayerTest {
   @Test
   public void testAddOrder() throws ServiceExceptions {
     assertEquals(0, OrdersDAOImpl.orderStorage.size());
-    LocalDate date = LocalDate.parse("12/25/2025", DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+    LocalDate date = LocalDate.parse("02/25/2025", DateTimeFormatter.ofPattern("MM/dd/yyyy"));
 
     // ** testing getFutureDate private method ** --------------------------------------------------
     when(mockUserIOImpl.readString(contains("Enter Date [MM/DD/YYYY]:")))
             .thenReturn("12/25/2023") // date must be set in the future
-            .thenReturn("12/25/2025");
+            .thenReturn("02/25/2025");
 
     // ** testing getValidName private method ** ---------------------------------------------------
     when(mockUserIOImpl.readString(contains("Enter Customer's Name:"))) //Enter Customer's Name:
@@ -129,7 +129,7 @@ public class ViewAndServiceLayerTest {
     assertEquals("TX", result.getString("state"));
     assertEquals("Wood", result.getString("product type"));
     assertEquals("200", result.getString("area"));
-    assertEquals("12/25/2025", result.getString("date"));
+    assertEquals("02/25/2025", result.getString("date"));
 
     Order order = service.addOrder(result);
 
