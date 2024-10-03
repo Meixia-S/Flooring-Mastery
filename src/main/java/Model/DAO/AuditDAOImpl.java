@@ -40,8 +40,8 @@ public class AuditDAOImpl implements AuditDAO {
    */
   public AuditDAOImpl() {
     try {
-      getProductInfo("src\\main\\java\\Files\\Data\\Products.txt");
-      getTaxInfo("src\\main\\java\\Files\\Data\\Taxes.txt");
+      getProductInfo("src\\main\\java\\DataFiles\\Products.txt");
+      getTaxInfo("src\\main\\java\\DataFiles\\Taxes.txt");
     } catch (ModelExceptions e) {
       throw new RuntimeException("File Paths for Products anf Taxes is invalid!");
     }
@@ -57,7 +57,7 @@ public class AuditDAOImpl implements AuditDAO {
   @Override
   public void addOrder(LocalDate date, Order order) throws ModelExceptions {
     try {
-      File file = new File("src\\main\\java\\Files\\Orders_" + dateToString(date) + ".txt");
+      File file = new File("src\\main\\java\\Orders\\Orders_" + dateToString(date) + ".txt");
 
       if (!file.exists()) {
         file.createNewFile();
@@ -90,7 +90,7 @@ public class AuditDAOImpl implements AuditDAO {
   @Override
   public void editAnOrder(LocalDate date, Order order) throws ModelExceptions {
     try {
-      File file = new File("src\\main\\java\\Files\\Orders_" + dateToString(date) + ".txt");
+      File file = new File("src\\main\\java\\Orders\\Orders_" + dateToString(date) + ".txt");
       reader = new Scanner(new BufferedReader(new FileReader(file)));
       List<String> remainingLines = new ArrayList<>();
 
@@ -138,7 +138,7 @@ public class AuditDAOImpl implements AuditDAO {
   @Override
   public void removeOrder(LocalDate date, int orderNum) throws ModelExceptions {
     try {
-      File file = new File("src\\main\\java\\Files\\Orders_" + dateToString(date) + ".txt");
+      File file = new File("src\\main\\java\\Orders\\Orders_" + dateToString(date) + ".txt");
       reader = new Scanner(new BufferedReader(new FileReader(file)));
 
       List<String> remainingLines = new ArrayList<>();
@@ -175,8 +175,8 @@ public class AuditDAOImpl implements AuditDAO {
   @Override
   public void export() throws ModelExceptions {
     try {
-      writer = new PrintWriter(new FileWriter("src\\main\\java\\Files\\Backup\\DataExport.txt"));
-      File[] files = new File("src\\main\\java\\Files").listFiles();
+      writer = new PrintWriter(new FileWriter("src\\main\\java\\Orders\\Backup\\DataExport.txt"));
+      File[] files = new File("src\\main\\java\\Orders").listFiles();
 
       for (File filename : files) {
         if (filename.isFile()) {

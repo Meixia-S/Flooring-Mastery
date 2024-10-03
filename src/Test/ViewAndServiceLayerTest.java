@@ -345,7 +345,7 @@ public class ViewAndServiceLayerTest {
 
   // Scenario user types 'n'
   @Test
-  public void testRemoveOrderN() {
+  public void testRemoveOrderN() throws ServiceExceptions {
     LocalDate date = LocalDate.parse("02/25/2025", DateTimeFormatter.ofPattern("MM/dd/yyyy"));
     this.ordersDAOImpl.addOrder(date, "Jane Doe", "IL", "Bamboo", BigDecimal.valueOf(100));
     this.ordersDAOImpl.addOrder(date, "Anna Fisher", "NE", "Rubber", BigDecimal.valueOf(505));
@@ -363,6 +363,7 @@ public class ViewAndServiceLayerTest {
 
     try{
       result = view.removeOrder();
+      service.removeOrder(result);
     } catch (NullPointerException e) {
       System.out.println("passed");
     }

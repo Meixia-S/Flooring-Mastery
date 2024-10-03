@@ -1,7 +1,7 @@
 package View;
 
-import org.json.JSONObject;
 import org.springframework.stereotype.Component;
+import org.json.JSONObject;
 
 import java.time.format.DateTimeParseException;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +39,10 @@ public class FlooringMasteryViewImpl implements View {
   public FlooringMasteryViewImpl(UserIOImpl userIOImpl) {
     this.userIOImpl = userIOImpl;
   }
+
+  // Getting rid of magic numbers and allowing for easy access if rules change
+  private final int TRIES = 3;
+  private final int MIN_ORDER_AREA = 100;
 
   /**
    * Displays the menu options for the flooring program and prompts the user to make a selection.
@@ -110,6 +114,9 @@ public class FlooringMasteryViewImpl implements View {
 
     // Getting the date and order number from user
     introEditOrder(orderInfo);
+    if (orderInfo.length() == 0) { // this means the user entered 3 non-existing dates
+      return new JSONObject();
+    }
 
     // Infinite loop to continuously prompt for order updates until confirmed
     while(true) {
@@ -157,6 +164,9 @@ public class FlooringMasteryViewImpl implements View {
     userIOImpl.readString("");
 
     String date = getExistingDate();
+    if (date.isEmpty()) {
+      return;
+    }
     orderInfo.put("date", date);
     orderInfo.put("order number", getExistingOrderNumber(date));
 
@@ -239,7 +249,7 @@ public class FlooringMasteryViewImpl implements View {
     int count = 0;
 
     // Allow the user up to 3 attempts to enter a valid date
-    while (count < 3) {
+    while (count < this.TRIES) {
       stringDate = userIOImpl.readString("Please Enter An Existing Order Date [MM/DD/YYYY]:");
 
       if (stringDate.isEmpty()) {
@@ -444,7 +454,7 @@ public class FlooringMasteryViewImpl implements View {
       } else if (Integer.valueOf(area) < 1) {
         userIOImpl.print("    * The area must be positive - please enter a positive number. *\n");
         continue;
-      } else if (Integer.valueOf(area) < 100 && Integer.valueOf(area) > 1) {
+      } else if (Integer.valueOf(area) < this.MIN_ORDER_AREA && Integer.valueOf(area) > 1) {
         userIOImpl.print("    * The minimum area is 100 - please enter a number at or above 100. *\n");
         continue;
       }
